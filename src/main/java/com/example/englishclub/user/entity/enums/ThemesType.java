@@ -1,4 +1,4 @@
-package com.example.englishclub.entity.enums;
+package com.example.englishclub.user.entity.enums;
 
 public enum ThemesType{
 	IT("IT"),
