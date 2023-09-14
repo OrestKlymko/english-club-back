@@ -21,6 +21,10 @@ public class UserEntity {
 	private long id;
 	@Column(name = "email")
 	private String email;
+	@Column(name = "username")
+	private String username;
+	@Column(name = "passwords")
+	private String password;
 	@Enumerated(EnumType.STRING)
 	@Column(name = "themes")
 	private ThemesType themes;

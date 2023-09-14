@@ -2,7 +2,8 @@ CREATE TABLE users
 (
     id               BIGINT PRIMARY KEY AUTO_INCREMENT,
     email            VARCHAR(100) UNIQUE,
-    passwords         VARCHAR(150),
+    username         VARCHAR(50),
+    passwords        VARCHAR(150),
     themes           ENUM ('IT', 'Marketing', 'Traveling', 'Education', 'Healthcare', 'Finance', 'Engineering', 'Hospitality', 'Sales', 'Art and Design', 'Legal', 'Science', 'Customer Service', 'Human Resources', 'Manufacturing', 'Agriculture', 'Media and Journalism', 'Fashion', 'Real Estate', 'Nonprofit', 'Consulting', 'Research', 'Retail', 'Construction', 'Government', 'Automotive', 'Telecommunications', 'Music', 'Sports', 'Entertainment', 'Architecture', 'Pharmaceutical', 'Aerospace'),
     country          VARCHAR(50),
     level_of_english ENUM ('Beginner', 'Intermediate', 'Upper-Intermediate', 'Advanced', 'Mastery')
@@ -10,7 +11,7 @@ CREATE TABLE users
 CREATE TABLE clubs
 (
     id                BIGINT PRIMARY KEY AUTO_INCREMENT,
-    currentDate              DATE,
+    currentDate       DATE,
     time_start        DATETIME,
     time_end          DATETIME,
     club_descriptions VARCHAR(255),
