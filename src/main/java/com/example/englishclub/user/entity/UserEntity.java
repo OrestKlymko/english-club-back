@@ -13,6 +13,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class UserEntity {
 	@Id
