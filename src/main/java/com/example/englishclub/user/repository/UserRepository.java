@@ -1,6 +1,6 @@
-package com.example.englishclub.repository;
+package com.example.englishclub.user.repository;
 
-import com.example.englishclub.entity.UserEntity;
+import com.example.englishclub.user.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

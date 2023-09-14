@@ -1,8 +1,9 @@
-package com.example.englishclub.entity;
+package com.example.englishclub.user.entity;
 
 
-import com.example.englishclub.entity.enums.LevelEnglish;
-import com.example.englishclub.entity.enums.ThemesType;
+import com.example.englishclub.user.entity.enums.LevelEnglish;
+import com.example.englishclub.user.entity.enums.ThemesType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,6 +13,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class UserEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +26,7 @@ public class UserEntity {
 	private ThemesType themes;
 	@Column(name = "country")
 	private String country;
+	@Enumerated(EnumType.STRING)
 	@Column(name = "level_of_english")
 	private LevelEnglish levelOfEnglish;
 }

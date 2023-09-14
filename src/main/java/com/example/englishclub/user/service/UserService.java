@@ -1,7 +1,7 @@
-package com.example.englishclub.service;
+package com.example.englishclub.user.service;
 
-import com.example.englishclub.entity.UserEntity;
-import com.example.englishclub.repository.UserRepository;
+import com.example.englishclub.user.entity.UserEntity;
+import com.example.englishclub.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,7 +1,7 @@
-package com.example.englishclub.controller;
+package com.example.englishclub.user.controller;
 
 
-import com.example.englishclub.service.UserService;
+import com.example.englishclub.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
