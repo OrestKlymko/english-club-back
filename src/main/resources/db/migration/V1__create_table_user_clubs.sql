@@ -10,14 +10,14 @@ CREATE TABLE users
 );
 CREATE TABLE clubs
 (
-    id                BIGINT PRIMARY KEY AUTO_INCREMENT,
-    currentDate       DATE,
-    time_start        DATETIME,
-    time_end          DATETIME,
-    club_descriptions VARCHAR(255),
-    themes            ENUM ('IT', 'Marketing', 'Traveling', 'Education', 'Healthcare', 'Finance', 'Engineering', 'Hospitality', 'Sales', 'Art and Design', 'Legal', 'Science', 'Customer Service', 'Human Resources', 'Manufacturing', 'Agriculture', 'Media and Journalism', 'Fashion', 'Real Estate', 'Nonprofit', 'Consulting', 'Research', 'Retail', 'Construction', 'Government', 'Automotive', 'Telecommunications', 'Music', 'Sports', 'Entertainment', 'Architecture', 'Pharmaceutical', 'Aerospace'),
-    level_of_english  ENUM ('Beginner', 'Intermediate', 'Upper-Intermediate', 'Advanced', 'Mastery'),
-    own_user_id       BIGINT,
+    id                    BIGINT PRIMARY KEY AUTO_INCREMENT,
+    current_date_creation DATE,
+    time_start            DATETIME,
+    time_end              DATETIME,
+    club_descriptions     VARCHAR(255),
+    themes                ENUM ('IT', 'Marketing', 'Traveling', 'Education', 'Healthcare', 'Finance', 'Engineering', 'Hospitality', 'Sales', 'Art and Design', 'Legal', 'Science', 'Customer Service', 'Human Resources', 'Manufacturing', 'Agriculture', 'Media and Journalism', 'Fashion', 'Real Estate', 'Nonprofit', 'Consulting', 'Research', 'Retail', 'Construction', 'Government', 'Automotive', 'Telecommunications', 'Music', 'Sports', 'Entertainment', 'Architecture', 'Pharmaceutical', 'Aerospace'),
+    level_of_english      ENUM ('Beginner', 'Intermediate', 'Upper-Intermediate', 'Advanced', 'Mastery'),
+    own_user_id           BIGINT,
     FOREIGN KEY (own_user_id) REFERENCES users (id)
 );
 
@@ -47,7 +47,7 @@ VALUES ('example@email.com', 'password123', 'IT', 'USA', 'Advanced'),
 
 
 
-INSERT INTO clubs (currentDate, time_start, time_end, club_descriptions, themes, level_of_english, own_user_id)
+INSERT INTO clubs (current_date_creation, time_start, time_end, club_descriptions, themes, level_of_english, own_user_id)
 VALUES ('2023-09-14', '2023-09-14 14:00:00', '2023-09-14 16:00:00', 'Club for IT enthusiasts', 'IT', 'Advanced', 1),
        ('2023-09-15', '2023-09-15 18:00:00', '2023-09-15 20:00:00', 'Marketing club meeting', 'Marketing',
         'Intermediate', 2);

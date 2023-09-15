@@ -10,11 +10,12 @@ import com.example.englishclub.user.exception.UserNotFoundException;
 import com.example.englishclub.user.model.UserChangePasswordModel;
 import com.example.englishclub.user.model.UserLoginModel;
 import com.example.englishclub.user.model.UserRegistrationModel;
+import com.example.englishclub.user.model.UserResponseModel;
 import com.example.englishclub.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +23,7 @@ import java.util.Optional;
 public class UserService {
 	@Autowired
 	private UserRepository userRepository;
+
 
 	public UserEntity getUserById(long id) throws UserNotFoundException {
 		Optional<UserEntity> findUser = userRepository.findById(id);
@@ -32,8 +34,13 @@ public class UserService {
 		}
 	}
 
-	public List<UserEntity> getAll() {
-		return userRepository.findAll();
+	public List<UserResponseModel> getAll() {
+		List<UserEntity> all = userRepository.findAll();
+		List<UserResponseModel> userList = new LinkedList<>();
+		for (UserEntity userEntity : all) {
+			userList.add(UserResponseModel.toModel(userEntity));
+		}
+		return userList;
 	}
 
 	public UserEntity registerNewCustomer(UserRegistrationModel model)
