@@ -41,14 +41,14 @@ public class UserEntity {
 	@Column(name = "level_of_english")
 	private LevelEnglish levelOfEnglish;
 
-	@ManyToMany
+	@ManyToMany(cascade = CascadeType.ALL)
 	@JoinTable(
 			name = "creating_club_in_user",
 			joinColumns = @JoinColumn(name = "user_id"),
 			inverseJoinColumns = @JoinColumn(name = "club_id")
 	)
 	private Set<ClubEntity> creationClubs;
-	@ManyToMany
+	@ManyToMany(cascade = CascadeType.ALL)
 	@JoinTable(
 			name = "exist_club_in_user",
 			joinColumns = @JoinColumn(name = "user_id"),

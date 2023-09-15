@@ -1,6 +1,7 @@
 package com.example.englishclub.user.controller;
 
 
+import com.example.englishclub.clubs.exception.CourseNotFoundException;
 import com.example.englishclub.user.entity.UserEntity;
 import com.example.englishclub.user.exception.IncorrectEmailException;
 import com.example.englishclub.user.exception.IncorrectPasswordException;
@@ -17,6 +18,7 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.Optional;
 
 
 @RestController
@@ -111,7 +113,24 @@ public class UserController {
 		try {
 			return ResponseEntity.ok(userService.getUserById(id));
 		} catch (UserNotFoundException e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(e.getMessage());
+		}
+	}
+
+	@PostMapping("/join/{user_id}/{club_id}")
+	public ResponseEntity joinToCourse(@PathVariable long user_id, @PathVariable long club_id) {
+		try {
+			userService.joinToCourse(club_id, user_id);
+			return ResponseEntity.status(HttpStatus.ACCEPTED)
+					.contentType(MediaType.APPLICATION_JSON)
+					.allow(HttpMethod.POST)
+					.body("Success joined");
+		} catch (UserNotFoundException | CourseNotFoundException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(e.getMessage());
 		}
 	}
 

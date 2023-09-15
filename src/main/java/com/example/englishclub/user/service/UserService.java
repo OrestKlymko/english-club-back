@@ -1,5 +1,8 @@
 package com.example.englishclub.user.service;
 
+import com.example.englishclub.clubs.entity.ClubEntity;
+import com.example.englishclub.clubs.exception.CourseNotFoundException;
+import com.example.englishclub.clubs.repository.ClubRepository;
 import com.example.englishclub.user.entity.UserEntity;
 import com.example.englishclub.user.entity.enums.LevelEnglish;
 import com.example.englishclub.user.entity.enums.ThemesType;
@@ -13,16 +16,23 @@ import com.example.englishclub.user.model.UserRegistrationModel;
 import com.example.englishclub.user.model.UserResponseModel;
 import com.example.englishclub.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UserService {
 	@Autowired
 	private UserRepository userRepository;
+
+	@Autowired
+	private ClubRepository clubRepository;
 
 
 	public UserEntity getUserById(long id) throws UserNotFoundException {
@@ -117,6 +127,26 @@ public class UserService {
 			UserEntity userEntity = userEntityByEmail.get();
 			userEntity.setLevelOfEnglish(LevelEnglish.valueOf(newLanguage));
 			userRepository.save(userEntity);
+		}
+	}
+
+
+	public void joinToCourse(long club_id, long user_id) throws UserNotFoundException, CourseNotFoundException {
+		Optional<UserEntity> userById = userRepository.findById(user_id);
+		Optional<ClubEntity> clubById = clubRepository.findById(club_id);
+
+		if (userById.isPresent() && clubById.isPresent()) {
+			UserEntity userEntity = userById.get();
+			ClubEntity clubEntity = clubById.get();
+
+			Set<ClubEntity> existClubs = userEntity.getExistClubs();
+			existClubs.add(clubEntity);
+			userEntity.setExistClubs(existClubs);
+			userRepository.save(userEntity);
+		} else if (userById.isEmpty()) {
+			throw new UserNotFoundException("User with id " + user_id + " not found");
+		} else {
+			throw new CourseNotFoundException("Course with id " + club_id + " not found");
 		}
 	}
 }
