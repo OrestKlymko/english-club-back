@@ -6,7 +6,6 @@ import com.example.englishclub.user.entity.enums.LevelEnglish;
 import com.example.englishclub.user.entity.enums.ThemesType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -55,5 +54,12 @@ public class UserEntity {
 			inverseJoinColumns = @JoinColumn(name = "club_id")
 	)
 	private Set<ClubEntity> existClubs;
+	@ManyToMany
+	@JoinTable(
+			name = "roles_users",
+			joinColumns = @JoinColumn(name = "user_id"),
+			inverseJoinColumns = @JoinColumn(name = "role_id")
+	)
+	private Set<RoleEntity> role;
 
 }

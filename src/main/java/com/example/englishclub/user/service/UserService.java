@@ -3,6 +3,7 @@ package com.example.englishclub.user.service;
 import com.example.englishclub.clubs.entity.ClubEntity;
 import com.example.englishclub.clubs.exception.CourseNotFoundException;
 import com.example.englishclub.clubs.repository.ClubRepository;
+import com.example.englishclub.user.entity.RoleEntity;
 import com.example.englishclub.user.entity.UserEntity;
 import com.example.englishclub.user.entity.enums.LevelEnglish;
 import com.example.englishclub.user.entity.enums.ThemesType;
@@ -15,19 +16,22 @@ import com.example.englishclub.user.model.UserLoginModel;
 import com.example.englishclub.user.model.UserRegistrationModel;
 import com.example.englishclub.user.model.UserResponseModel;
 import com.example.englishclub.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 	@Autowired
 	private UserRepository userRepository;
 
@@ -58,6 +62,12 @@ public class UserService {
 		Optional<UserEntity> userEntityByEmail = userRepository.findUserEntityByEmail(model.getEmail());
 		if (userEntityByEmail.isEmpty()) {
 			if (createNewCustomerSuccess(model.getEmail(), model.getPasswords())) {
+				RoleEntity roleUser = RoleEntity.builder()
+						.name("ROLE_USER")
+						.build();
+				Set<RoleEntity> roles = new HashSet<>();
+				roles.add(roleUser);
+
 				UserEntity userToSave = UserEntity.builder()
 						.email(model.getEmail())
 						.password(model.getPasswords())
@@ -65,12 +75,15 @@ public class UserService {
 						.levelOfEnglish(LevelEnglish.valueOf(LevelEnglish.class, model.getLevelOfEnglish().getValue()))
 						.country(model.getCountry())
 						.username(model.getUsername())
+						.role(roles)
 						.build();
 				return userRepository.save(userToSave);
 			}
 		}
 		throw new UserAlreadyExistException("User with email " + userEntityByEmail.get().getEmail() + " already exist");
 	}
+
+
 
 	private boolean createNewCustomerSuccess(String email, String password) throws IncorrectEmailException, IncorrectPasswordException {
 		String validEmailRegex = "^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$";
@@ -148,5 +161,21 @@ public class UserService {
 		} else {
 			throw new CourseNotFoundException("Course with id " + club_id + " not found");
 		}
+	}
+
+	public Optional<UserEntity> findByUserName(String username) {
+		return userRepository.findUserEntityByUsername(username);
+	}
+
+	@Override
+	@Transactional
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		UserEntity userFind = findByUserName(username).orElseThrow(() -> new UsernameNotFoundException("Username " + username + " not found"));
+
+		return new User(
+				userFind.getUsername(),
+				userFind.getPassword(),
+				userFind.getRole().stream().map(role -> new SimpleGrantedAuthority(role.getName())).toList()
+		);
 	}
 }
