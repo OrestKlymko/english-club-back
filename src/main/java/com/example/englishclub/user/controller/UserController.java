@@ -6,19 +6,19 @@ import com.example.englishclub.user.exception.IncorrectEmailException;
 import com.example.englishclub.user.exception.IncorrectPasswordException;
 import com.example.englishclub.user.exception.UserAlreadyExistException;
 import com.example.englishclub.user.exception.UserNotFoundException;
+import com.example.englishclub.user.model.UserChangePasswordModel;
+import com.example.englishclub.user.model.UserLoginModel;
 import com.example.englishclub.user.model.UserRegistrationModel;
 import com.example.englishclub.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
-@Controller
+
 @RestController
 @RequestMapping("/api/v1/user")
 @RequiredArgsConstructor
@@ -33,7 +33,7 @@ public class UserController {
 
 		try {
 			UserEntity userEntity = userService.registerNewCustomer(userRegistrationModel);
-			URI uri = URI.create(request.getRequestURI()+"/users/" + userEntity.getId());
+			URI uri = URI.create(request.getRequestURI() + "/users/" + userEntity.getId());
 			return ResponseEntity.status(HttpStatus.CREATED)
 					.location(uri)
 					.allow(HttpMethod.POST)
@@ -41,30 +41,69 @@ public class UserController {
 					.build();
 		} catch (UserAlreadyExistException | IncorrectEmailException | IncorrectPasswordException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.allow(HttpMethod.POST)
 					.contentType(MediaType.APPLICATION_JSON)
 					.body(e.getMessage());
 		}
 	}
 
 	@PostMapping("/login")
-	public void loginUser() {
-
+	public ResponseEntity loginUser(@RequestBody UserLoginModel userLoginModel, HttpServletRequest request) {
+		try {
+			userService.login(userLoginModel);
+			return ResponseEntity.status(HttpStatus.ACCEPTED)
+					.contentType(MediaType.APPLICATION_JSON)
+					.allow(HttpMethod.POST)
+					.body("Login success");
+		} catch (UserNotFoundException | IncorrectPasswordException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(e.getMessage());
+		}
 	}
 
-	@PostMapping("/delete")
-	public void deleteUser() {
-
+	@PostMapping("/delete/{id}")
+	public ResponseEntity deleteUser(@PathVariable long id) {
+		try {
+			userService.deleteUser(id);
+			return ResponseEntity.status(HttpStatus.OK)
+					.contentType(MediaType.APPLICATION_JSON)
+					.allow(HttpMethod.POST)
+					.body("User deleted");
+		} catch (UserNotFoundException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(e.getMessage());
+		}
 	}
 
 	@PostMapping("/change/password")
-	public void changePassword() {
-
+	public ResponseEntity changePassword(UserChangePasswordModel userChangePasswordModel) {
+		try {
+			userService.changePassword(userChangePasswordModel);
+			return ResponseEntity.status(HttpStatus.ACCEPTED)
+					.contentType(MediaType.APPLICATION_JSON)
+					.allow(HttpMethod.POST)
+					.body("Password changed");
+		} catch (UserNotFoundException | IncorrectEmailException | IncorrectPasswordException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(e.getMessage());
+		}
 	}
 
-	@PostMapping("/change/english-level")
-	public void updateEnglishLevel() {
-
+	@PostMapping("{id}/change/english-level/{newLanguage}")
+	public ResponseEntity updateEnglishLevel(@PathVariable int id, @PathVariable String newLanguage) {
+		try {
+			userService.updateEnglishLevelById(id, newLanguage);
+			return ResponseEntity.status(HttpStatus.ACCEPTED)
+					.contentType(MediaType.APPLICATION_JSON)
+					.allow(HttpMethod.POST)
+					.body("Language changed");
+		} catch (UserNotFoundException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(e.getMessage());
+		}
 	}
 
 	@GetMapping("/{id}")

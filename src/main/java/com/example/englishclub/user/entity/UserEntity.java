@@ -1,11 +1,16 @@
 package com.example.englishclub.user.entity;
 
 
+import com.example.englishclub.clubs.entity.ClubEntity;
 import com.example.englishclub.user.entity.enums.LevelEnglish;
 import com.example.englishclub.user.entity.enums.ThemesType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.Set;
 
 @Table(name = "users")
 @Entity
@@ -13,6 +18,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class UserEntity {
 	@Id
@@ -24,6 +30,7 @@ public class UserEntity {
 	@Column(name = "username")
 	private String username;
 	@Column(name = "passwords")
+	@JsonIgnore
 	private String password;
 	@Enumerated(EnumType.STRING)
 	@Column(name = "themes")
@@ -33,4 +40,20 @@ public class UserEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "level_of_english")
 	private LevelEnglish levelOfEnglish;
+
+	@ManyToMany
+	@JoinTable(
+			name = "creating_club_in_user",
+			joinColumns = @JoinColumn(name = "user_id"),
+			inverseJoinColumns = @JoinColumn(name = "club_id")
+	)
+	private Set<ClubEntity> creationClubs;
+	@ManyToMany
+	@JoinTable(
+			name = "exist_club_in_user",
+			joinColumns = @JoinColumn(name = "user_id"),
+			inverseJoinColumns = @JoinColumn(name = "club_id")
+	)
+	private Set<ClubEntity> existClubs;
+
 }
