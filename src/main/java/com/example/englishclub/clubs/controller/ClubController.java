@@ -19,7 +19,6 @@ public class ClubController {
 	@Autowired
 	private ClubService clubService;
 
-
 	@GetMapping("/get-all")
 	public ResponseEntity getAllCourse() {
 		return ResponseEntity.ok().body(clubService.getAllClubs());

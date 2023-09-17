@@ -6,7 +6,9 @@ CREATE TABLE users
     passwords        VARCHAR(150),
     themes           ENUM ('IT', 'Marketing', 'Traveling', 'Education', 'Healthcare', 'Finance', 'Engineering', 'Hospitality', 'Sales', 'Art and Design', 'Legal', 'Science', 'Customer Service', 'Human Resources', 'Manufacturing', 'Agriculture', 'Media and Journalism', 'Fashion', 'Real Estate', 'Nonprofit', 'Consulting', 'Research', 'Retail', 'Construction', 'Government', 'Automotive', 'Telecommunications', 'Music', 'Sports', 'Entertainment', 'Architecture', 'Pharmaceutical', 'Aerospace'),
     country          VARCHAR(50),
-    level_of_english ENUM ('Beginner', 'Intermediate', 'Upper-Intermediate', 'Advanced', 'Mastery')
+    level_of_english ENUM ('Beginner', 'Intermediate', 'Upper-Intermediate', 'Advanced', 'Mastery'),
+    role             varchar(45),
+    enabled          tinyint(4)
 );
 CREATE TABLE clubs
 (
@@ -39,28 +41,15 @@ CREATE TABLE creating_club_in_user
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
-CREATE TABLE roles
-(
-    id   BIGINT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(50) NOT NULL
-);
-
-CREATE TABLE roles_users
-(
-    user_id BIGINT,
-    role_id BIGINT,
-    FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (role_id) REFERENCES roles (id)
-);
 
 
 
-INSERT INTO users (email, username, passwords, themes, country, level_of_english)
-VALUES ('user1@example.com', 'user1', '$2a$10$4EODyHT2Tblsv41blAdjLO7Kwq3jbzl83R.94t1akF9XQhP7FbgtW', 'IT', 'USA', 'Intermediate'),
-       ('user2@example.com', 'user2', '$2a$10$ycKTvOpmvoqRGRV2ZPHzk.LM5SWQ.hvkkJIiSEbNOW2xhrvYpZ8pi', 'Marketing', 'Canada', 'Advanced'),
-       ('user3@example.com', 'user3', 'password3', 'Education', 'UK', 'Intermediate'),
-       ('user4@example.com', 'user4', 'password4', 'Finance', 'Australia', 'Mastery'),
-       ('user5@example.com', 'user5', 'password5', 'Healthcare', 'Germany', 'Beginner');
+INSERT INTO users (email, username, passwords, themes, country, level_of_english,role,enabled)
+VALUES ('user1@example.com', 'user1', '$2a$10$XptfskLsT1l/bRTLRiiCgejHqOpgXFreUnNUa35gJdCr2v2QbVFzu', 'IT', 'USA', 'Intermediate','ROLE_ADMIN', 1),
+       ('user2@example.com', 'user2', 'password2', 'Marketing', 'Canada', 'Advanced','ROLE_ADMIN', 1),
+       ('user3@example.com', 'user3', 'password3', 'Education', 'UK', 'Intermediate','ROLE_ADMIN', 1),
+       ('user4@example.com', 'user4', 'password4', 'Finance', 'Australia', 'Mastery','ROLE_ADMIN', 1),
+       ('user5@example.com', 'user5', 'password5', 'Healthcare', 'Germany', 'Beginner','ROLE_ADMIN', 1);
 
 
 INSERT INTO clubs (current_date_creation, time_start, time_end, club_descriptions, themes, level_of_english,
@@ -87,16 +76,4 @@ VALUES (1, 1),
        (3, 3),
        (4, 4),
        (5, 5);
-
-
-INSERT INTO roles (name)
-VALUES ('ROLE_ADMIN'),
-       ('ROLE_USER');
-
-INSERT INTO roles_users (user_id, role_id)
-VALUES (1, 1),
-       (2, 2),
-       (3, 2),
-       (4, 2),
-       (5, 2);
 

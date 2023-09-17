@@ -14,10 +14,9 @@ import java.util.Set;
 @Table(name = "users")
 @Entity
 @Builder
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
-@Getter
-@Setter
+@NoArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class UserEntity {
 	@Id
@@ -54,12 +53,10 @@ public class UserEntity {
 			inverseJoinColumns = @JoinColumn(name = "club_id")
 	)
 	private Set<ClubEntity> existClubs;
-	@ManyToMany
-	@JoinTable(
-			name = "roles_users",
-			joinColumns = @JoinColumn(name = "user_id"),
-			inverseJoinColumns = @JoinColumn(name = "role_id")
-	)
-	private Set<RoleEntity> role;
+	@Column(name = "role")
+	private String role;
+	@Column(name = "enabled")
+	@JsonIgnore
+	private boolean enabled;
 
 }

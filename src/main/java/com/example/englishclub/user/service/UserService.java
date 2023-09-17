@@ -3,7 +3,8 @@ package com.example.englishclub.user.service;
 import com.example.englishclub.clubs.entity.ClubEntity;
 import com.example.englishclub.clubs.exception.CourseNotFoundException;
 import com.example.englishclub.clubs.repository.ClubRepository;
-import com.example.englishclub.user.entity.RoleEntity;
+import com.example.englishclub.security.SecurityConfig;
+import com.example.englishclub.security.exception.UserNotAuthenticated;
 import com.example.englishclub.user.entity.UserEntity;
 import com.example.englishclub.user.entity.enums.LevelEnglish;
 import com.example.englishclub.user.entity.enums.ThemesType;
@@ -16,36 +17,27 @@ import com.example.englishclub.user.model.UserLoginModel;
 import com.example.englishclub.user.model.UserRegistrationModel;
 import com.example.englishclub.user.model.UserResponseModel;
 import com.example.englishclub.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+
 
 import java.util.*;
 
 @Service
-public class UserService implements UserDetailsService {
+public class UserService {
 	@Autowired
 	private UserRepository userRepository;
 
 	@Autowired
 	private ClubRepository clubRepository;
 
+	@Autowired
+	private SecurityConfig securityConfig;
 
-	public UserEntity getUserById(long id) throws UserNotFoundException {
-		Optional<UserEntity> findUser = userRepository.findById(id);
-		if (findUser.isPresent()) {
-			return findUser.get();
-		} else {
-			throw new UserNotFoundException("User with id " + id + " not found");
-		}
+	public UserEntity getUser() throws UserNotFoundException, UserNotAuthenticated {
+		return getAuthenticatedUser();
+
 	}
 
 	public List<UserResponseModel> getAll() {
@@ -62,20 +54,16 @@ public class UserService implements UserDetailsService {
 		Optional<UserEntity> userEntityByEmail = userRepository.findUserEntityByEmail(model.getEmail());
 		if (userEntityByEmail.isEmpty()) {
 			if (createNewCustomerSuccess(model.getEmail(), model.getPasswords())) {
-				RoleEntity roleUser = RoleEntity.builder()
-						.name("ROLE_USER")
-						.build();
-				Set<RoleEntity> roles = new HashSet<>();
-				roles.add(roleUser);
+
 
 				UserEntity userToSave = UserEntity.builder()
 						.email(model.getEmail())
-						.password(model.getPasswords())
+						.password(securityConfig.passwordEncoder().encode(model.getPasswords()))
 						.themes(ThemesType.valueOf(ThemesType.class, model.getThemes().getValue()))
 						.levelOfEnglish(LevelEnglish.valueOf(LevelEnglish.class, model.getLevelOfEnglish().getValue()))
 						.country(model.getCountry())
 						.username(model.getUsername())
-						.role(roles)
+						.role("ROLE_USER")
 						.build();
 				return userRepository.save(userToSave);
 			}
@@ -84,8 +72,8 @@ public class UserService implements UserDetailsService {
 	}
 
 
-
-	private boolean createNewCustomerSuccess(String email, String password) throws IncorrectEmailException, IncorrectPasswordException {
+	private boolean createNewCustomerSuccess(String email, String password) throws
+			IncorrectEmailException, IncorrectPasswordException {
 		String validEmailRegex = "^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$";
 		String validPassword = "^(?=.*[0-9])(?=.*[a-z]).{8,20}$";
 		if (!email.matches(validEmailRegex)) {
@@ -110,7 +98,8 @@ public class UserService implements UserDetailsService {
 		throw new UserNotFoundException("User with email " + userLoginModel.getEmail() + " not found");
 	}
 
-	public void changePassword(UserChangePasswordModel user) throws UserNotFoundException, IncorrectEmailException, IncorrectPasswordException {
+	public void changePassword(UserChangePasswordModel user) throws
+			UserNotFoundException, IncorrectEmailException, IncorrectPasswordException {
 		Optional<UserEntity> userEntityByEmail = userRepository.findUserEntityByEmail(user.getEmail());
 		if (userEntityByEmail.isEmpty()) {
 			throw new UserNotFoundException("User with email " + user.getEmail() + " not found");
@@ -123,59 +112,43 @@ public class UserService implements UserDetailsService {
 		}
 	}
 
-	public void deleteUser(long id) throws UserNotFoundException {
-		Optional<UserEntity> userEntityByEmail = userRepository.findById(id);
-		if (userEntityByEmail.isEmpty()) {
-			throw new UserNotFoundException("User with id " + id + " not found");
-		} else {
-			userRepository.deleteById(id);
-		}
+	public void deleteUser() throws UserNotFoundException {
+		UserEntity correctAuth = getAuthenticatedUser();
+		userRepository.deleteById(correctAuth.getId());
+
 	}
 
-	public void updateEnglishLevelById(long id, String newLanguage) throws UserNotFoundException {
-		Optional<UserEntity> userEntityByEmail = userRepository.findById(id);
-		if (userEntityByEmail.isEmpty()) {
-			throw new UserNotFoundException("User with id " + id + " not found");
-		} else {
-			UserEntity userEntity = userEntityByEmail.get();
-			userEntity.setLevelOfEnglish(LevelEnglish.valueOf(newLanguage));
-			userRepository.save(userEntity);
-		}
+	public void updateEnglishLevelById(String newLanguage) throws UserNotFoundException {
+		UserEntity authenticatedUser = getAuthenticatedUser();
+		authenticatedUser.setLevelOfEnglish(LevelEnglish.valueOf(newLanguage));
+		userRepository.save(authenticatedUser);
 	}
 
 
-	public void joinToCourse(long club_id, long user_id) throws UserNotFoundException, CourseNotFoundException {
-		Optional<UserEntity> userById = userRepository.findById(user_id);
+	public void joinToCourse(long club_id) throws UserNotFoundException, CourseNotFoundException {
+		UserEntity authenticatedUser = getAuthenticatedUser();
 		Optional<ClubEntity> clubById = clubRepository.findById(club_id);
-
-		if (userById.isPresent() && clubById.isPresent()) {
-			UserEntity userEntity = userById.get();
+		if (clubById.isPresent()) {
 			ClubEntity clubEntity = clubById.get();
-
-			Set<ClubEntity> existClubs = userEntity.getExistClubs();
+			Set<ClubEntity> existClubs = authenticatedUser.getExistClubs();
 			existClubs.add(clubEntity);
-			userEntity.setExistClubs(existClubs);
-			userRepository.save(userEntity);
-		} else if (userById.isEmpty()) {
-			throw new UserNotFoundException("User with id " + user_id + " not found");
+			authenticatedUser.setExistClubs(existClubs);
+			userRepository.save(authenticatedUser);
 		} else {
 			throw new CourseNotFoundException("Course with id " + club_id + " not found");
 		}
 	}
 
-	public Optional<UserEntity> findByUserName(String username) {
-		return userRepository.findUserEntityByUsername(username);
+	private UserEntity getAuthenticatedUser() throws UserNotFoundException {
+		Authentication auth = securityConfig.getAuth();
+		if (auth != null && auth.isAuthenticated()) {
+			Optional<UserEntity> userByUsername = userRepository.findUserEntityByUsername(auth.getName());
+			if (userByUsername.isPresent()) {
+				return userByUsername.get();
+			}
+		}
+		throw new UserNotFoundException("User  not found");
 	}
 
-	@Override
-	@Transactional
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		UserEntity userFind = findByUserName(username).orElseThrow(() -> new UsernameNotFoundException("Username " + username + " not found"));
 
-		return new User(
-				userFind.getUsername(),
-				userFind.getPassword(),
-				userFind.getRole().stream().map(role -> new SimpleGrantedAuthority(role.getName())).toList()
-		);
-	}
 }
