@@ -24,10 +24,10 @@ public class JWTtoken {
 	public String generateToken(UserDetails userDetails){
 		Map<String,Object> claims = new HashMap<>();
 		List<String> roles = userDetails.getAuthorities().stream()
-				.map(role -> role.getAuthority()).toList();
+				.map(GrantedAuthority::getAuthority).toList();
 
 		claims.put("roles",roles);
-		claims.put("email",userDetails.getUsername());
+		claims.put("username",userDetails.getUsername());
 
 		Date issuedDate = new Date();
 		Date expiredDate = new Date(issuedDate.getTime()+time.toMillis());
@@ -43,7 +43,7 @@ public class JWTtoken {
 	}
 
 	public String getUsernameFromToken(String token){
-		return getAllClaimsFromToken(token).get("email",String.class);
+		return getAllClaimsFromToken(token).get("username",String.class);
 	}
 
 	public List<GrantedAuthority> getRolesFromToken(String token) {

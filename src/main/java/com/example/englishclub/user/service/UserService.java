@@ -43,11 +43,8 @@ public class UserService {
 	private JWTtoken jwTtoken;
 
 
-
-
-
-
 	public UserEntity getUser() throws UserNotFoundException, UserNotAuthenticated {
+
 		return getAuthenticatedUser();
 	}
 
@@ -75,6 +72,7 @@ public class UserService {
 						.country(model.getCountry())
 						.username(model.getUsername())
 						.role("ROLE_USER")
+						.enabled(true)
 						.build();
 				return userRepository.save(userToSave);
 			}
@@ -150,6 +148,7 @@ public class UserService {
 	}
 
 	private UserEntity getAuthenticatedUser() throws UserNotFoundException {
+
 		Authentication auth = securityConfig.getAuth();
 		if (auth != null && auth.isAuthenticated()) {
 			Optional<UserEntity> userByUsername = userRepository.findUserEntityByUsername(auth.getName());
