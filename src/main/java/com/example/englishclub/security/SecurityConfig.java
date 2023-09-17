@@ -1,61 +1,63 @@
 package com.example.englishclub.security;
 
-
-import com.example.englishclub.user.service.UserService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.stereotype.Component;
+
+
+import javax.sql.DataSource;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @EnableWebSecurity
-@RequiredArgsConstructor
-@Component
+@Configuration
 public class SecurityConfig {
-
-	private final UserService userService;
-
 	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-		return httpSecurity
-				.csrf(AbstractHttpConfigurer::disable)
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		http
 				.cors(AbstractHttpConfigurer::disable)
-				.authorizeHttpRequests(request -> {
-					request.requestMatchers("/api/v1/clubs/get-all").permitAll();
-				})
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.exceptionHandling(exc -> exc.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-				.build();
-	}
-
-
-	@Bean
-	public DaoAuthenticationProvider daoAuthenticationProvider() {
-		DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-		daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-		daoAuthenticationProvider.setUserDetailsService(userService);
-
-		return daoAuthenticationProvider;
-
+				.csrf(AbstractHttpConfigurer::disable)
+				.authorizeHttpRequests((authz) -> authz
+						.anyRequest().authenticated()
+				)
+				.sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.httpBasic(withDefaults());
+		return http.build();
 	}
 
 	@Bean
-	public BCryptPasswordEncoder passwordEncoder() {
+	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 
+
 	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-		return configuration.getAuthenticationManager();
+	public UserDetailsManager users(DataSource dataSource) {
+		JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
+		users.setUsersByUsernameQuery("select username, passwords, enabled from users where username=?");
+		users.setAuthoritiesByUsernameQuery("select username, role from users where username=?");
+		return users;
 	}
+
+
+
+	public Authentication getAuth(){
+		return SecurityContextHolder.getContext().getAuthentication();
+	}
+
 }
+
+
+
+
+

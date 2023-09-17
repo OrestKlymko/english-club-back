@@ -2,6 +2,8 @@ package com.example.englishclub.user.controller;
 
 
 import com.example.englishclub.clubs.exception.CourseNotFoundException;
+import com.example.englishclub.security.SecurityConfig;
+import com.example.englishclub.security.exception.UserNotAuthenticated;
 import com.example.englishclub.user.entity.UserEntity;
 import com.example.englishclub.user.exception.IncorrectEmailException;
 import com.example.englishclub.user.exception.IncorrectPasswordException;
@@ -63,10 +65,10 @@ public class UserController {
 		}
 	}
 
-	@PostMapping("/delete/{id}")
-	public ResponseEntity deleteUser(@PathVariable long id) {
+	@PostMapping("/delete")
+	public ResponseEntity deleteUser() {
 		try {
-			userService.deleteUser(id);
+			userService.deleteUser();
 			return ResponseEntity.status(HttpStatus.OK)
 					.contentType(MediaType.APPLICATION_JSON)
 					.allow(HttpMethod.POST)
@@ -93,10 +95,10 @@ public class UserController {
 		}
 	}
 
-	@PostMapping("{id}/change/english-level/{newLanguage}")
-	public ResponseEntity updateEnglishLevel(@PathVariable int id, @PathVariable String newLanguage) {
+	@PostMapping("change/english-level/{newLanguage}")
+	public ResponseEntity updateEnglishLevel( @PathVariable String newLanguage) {
 		try {
-			userService.updateEnglishLevelById(id, newLanguage);
+			userService.updateEnglishLevelById(newLanguage);
 			return ResponseEntity.status(HttpStatus.ACCEPTED)
 					.contentType(MediaType.APPLICATION_JSON)
 					.allow(HttpMethod.POST)
@@ -108,21 +110,21 @@ public class UserController {
 		}
 	}
 
-	@GetMapping("/{id}")
-	public ResponseEntity getUserById(@PathVariable long id) {
+	@GetMapping("/get-info")
+	public ResponseEntity getInfoAboutUser() {
 		try {
-			return ResponseEntity.ok(userService.getUserById(id));
-		} catch (UserNotFoundException e) {
+			return ResponseEntity.ok(userService.getUser());
+		} catch (UserNotFoundException | UserNotAuthenticated e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.contentType(MediaType.APPLICATION_JSON)
 					.body(e.getMessage());
 		}
 	}
 
-	@PostMapping("/join/{user_id}/{club_id}")
-	public ResponseEntity joinToCourse(@PathVariable long user_id, @PathVariable long club_id) {
+	@PostMapping("/join/{club_id}")
+	public ResponseEntity joinToCourse(@PathVariable long club_id) {
 		try {
-			userService.joinToCourse(club_id, user_id);
+			userService.joinToCourse(club_id);
 			return ResponseEntity.status(HttpStatus.ACCEPTED)
 					.contentType(MediaType.APPLICATION_JSON)
 					.allow(HttpMethod.POST)
@@ -136,7 +138,7 @@ public class UserController {
 
 
 	@GetMapping("/all")
-	public ResponseEntity getUserById() {
+	public ResponseEntity getAllUsers() {
 		return ResponseEntity.ok(userService.getAll());
 	}
 }
