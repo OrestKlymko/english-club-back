@@ -2,15 +2,14 @@ package com.example.englishclub.user.controller;
 
 
 import com.example.englishclub.clubs.exception.CourseNotFoundException;
-import com.example.englishclub.security.SecurityConfig;
 import com.example.englishclub.security.exception.UserNotAuthenticated;
+import com.example.englishclub.security.jwt.JwtRequest;
 import com.example.englishclub.user.entity.UserEntity;
 import com.example.englishclub.user.exception.IncorrectEmailException;
 import com.example.englishclub.user.exception.IncorrectPasswordException;
 import com.example.englishclub.user.exception.UserAlreadyExistException;
 import com.example.englishclub.user.exception.UserNotFoundException;
 import com.example.englishclub.user.model.UserChangePasswordModel;
-import com.example.englishclub.user.model.UserLoginModel;
 import com.example.englishclub.user.model.UserRegistrationModel;
 import com.example.englishclub.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +19,6 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.Optional;
 
 
 @RestController
@@ -30,6 +28,8 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+
+
 
 
 	@PostMapping("/create")
@@ -51,17 +51,15 @@ public class UserController {
 	}
 
 	@PostMapping("/login-user")
-	public ResponseEntity loginUser() {
+	public ResponseEntity loginUser(@RequestBody JwtRequest jwtRequest) {
 		try {
 
 			return ResponseEntity.status(HttpStatus.ACCEPTED)
 					.contentType(MediaType.APPLICATION_JSON)
 					.allow(HttpMethod.POST)
-					.body(userService.loginUser());
-		} catch (UserNotFoundException | IncorrectPasswordException e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.contentType(MediaType.APPLICATION_JSON)
-					.body(e.getMessage());
+					.body(userService.loginUser(jwtRequest));
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -95,10 +93,10 @@ public class UserController {
 		}
 	}
 
-	@PostMapping("change/english-level/{newLanguage}")
-	public ResponseEntity updateEnglishLevel(@PathVariable String newLanguage) {
+	@PostMapping("change/english-level/{newLevelLanguage}")
+	public ResponseEntity updateEnglishLevel(@PathVariable String newLevelLanguage) {
 		try {
-			userService.updateEnglishLevelById(newLanguage);
+			userService.updateEnglishLevelById(newLevelLanguage);
 			return ResponseEntity.status(HttpStatus.ACCEPTED)
 					.contentType(MediaType.APPLICATION_JSON)
 					.allow(HttpMethod.POST)

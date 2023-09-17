@@ -5,14 +5,13 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class JWTtoken {
@@ -47,8 +46,17 @@ public class JWTtoken {
 		return getAllClaimsFromToken(token).get("email",String.class);
 	}
 
-	public List getRolesFromToken(String token){
-		return getAllClaimsFromToken(token).get("roles",List.class);
+	public List<GrantedAuthority> getRolesFromToken(String token) {
+		List<String> roles = getAllClaimsFromToken(token).get("roles", List.class);
+		List<GrantedAuthority> authorities = new ArrayList<>();
+
+		if (roles != null) {
+			for (String role : roles) {
+				authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+			}
+		}
+
+		return authorities;
 	}
 
 	private Claims getAllClaimsFromToken(String token){

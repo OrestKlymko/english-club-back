@@ -6,6 +6,7 @@ import com.example.englishclub.clubs.repository.ClubRepository;
 import com.example.englishclub.security.SecurityConfig;
 import com.example.englishclub.security.exception.UserNotAuthenticated;
 import com.example.englishclub.security.jwt.JWTtoken;
+import com.example.englishclub.security.jwt.JwtRequest;
 import com.example.englishclub.user.entity.UserEntity;
 import com.example.englishclub.user.entity.enums.LevelEnglish;
 import com.example.englishclub.user.entity.enums.ThemesType;
@@ -14,17 +15,14 @@ import com.example.englishclub.user.exception.IncorrectPasswordException;
 import com.example.englishclub.user.exception.UserAlreadyExistException;
 import com.example.englishclub.user.exception.UserNotFoundException;
 import com.example.englishclub.user.model.UserChangePasswordModel;
-import com.example.englishclub.user.model.UserLoginModel;
 import com.example.englishclub.user.model.UserRegistrationModel;
 import com.example.englishclub.user.model.UserResponseModel;
 import com.example.englishclub.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 
@@ -44,8 +42,10 @@ public class UserService {
 	@Autowired
 	private JWTtoken jwTtoken;
 
-//	@Autowired
-//	private JWTtoken jwTtoken;
+
+
+
+
 
 	public UserEntity getUser() throws UserNotFoundException, UserNotAuthenticated {
 		return getAuthenticatedUser();
@@ -97,10 +97,16 @@ public class UserService {
 	}
 
 
-	public String loginUser() throws UserNotFoundException, IncorrectPasswordException {
-			UserDetails userDetails= (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-			return jwTtoken.generateToken(userDetails);
+	public String loginUser(JwtRequest jwtRequest) throws Exception {
+		Authentication authentication = securityConfig.authenticationManager().authenticate(
+				new UsernamePasswordAuthenticationToken(jwtRequest.getUsername(), jwtRequest.getPassword())
+		);
+
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		return jwTtoken.generateToken(userDetails);
 	}
+
 
 	public void changePassword(UserChangePasswordModel user) throws
 			UserNotFoundException, IncorrectEmailException, IncorrectPasswordException {
