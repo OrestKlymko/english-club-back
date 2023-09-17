@@ -1,4 +1,4 @@
-package com.example.englishclub.security;
+package com.example.englishclub.security.jwt;
 
 
 import io.jsonwebtoken.Claims;

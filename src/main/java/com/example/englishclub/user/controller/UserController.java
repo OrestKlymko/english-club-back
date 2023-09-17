@@ -50,14 +50,14 @@ public class UserController {
 		}
 	}
 
-	@PostMapping("/login")
-	public ResponseEntity loginUser(@RequestBody UserLoginModel userLoginModel, HttpServletRequest request) {
+	@PostMapping("/login-user")
+	public ResponseEntity loginUser() {
 		try {
-			userService.login(userLoginModel);
+
 			return ResponseEntity.status(HttpStatus.ACCEPTED)
 					.contentType(MediaType.APPLICATION_JSON)
 					.allow(HttpMethod.POST)
-					.body("Login success");
+					.body(userService.loginUser());
 		} catch (UserNotFoundException | IncorrectPasswordException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.contentType(MediaType.APPLICATION_JSON)
@@ -96,7 +96,7 @@ public class UserController {
 	}
 
 	@PostMapping("change/english-level/{newLanguage}")
-	public ResponseEntity updateEnglishLevel( @PathVariable String newLanguage) {
+	public ResponseEntity updateEnglishLevel(@PathVariable String newLanguage) {
 		try {
 			userService.updateEnglishLevelById(newLanguage);
 			return ResponseEntity.status(HttpStatus.ACCEPTED)

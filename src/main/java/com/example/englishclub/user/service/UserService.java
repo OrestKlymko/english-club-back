@@ -5,6 +5,7 @@ import com.example.englishclub.clubs.exception.CourseNotFoundException;
 import com.example.englishclub.clubs.repository.ClubRepository;
 import com.example.englishclub.security.SecurityConfig;
 import com.example.englishclub.security.exception.UserNotAuthenticated;
+import com.example.englishclub.security.jwt.JWTtoken;
 import com.example.englishclub.user.entity.UserEntity;
 import com.example.englishclub.user.entity.enums.LevelEnglish;
 import com.example.englishclub.user.entity.enums.ThemesType;
@@ -19,6 +20,11 @@ import com.example.englishclub.user.model.UserResponseModel;
 import com.example.englishclub.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 
@@ -35,9 +41,14 @@ public class UserService {
 	@Autowired
 	private SecurityConfig securityConfig;
 
+	@Autowired
+	private JWTtoken jwTtoken;
+
+//	@Autowired
+//	private JWTtoken jwTtoken;
+
 	public UserEntity getUser() throws UserNotFoundException, UserNotAuthenticated {
 		return getAuthenticatedUser();
-
 	}
 
 	public List<UserResponseModel> getAll() {
@@ -86,16 +97,9 @@ public class UserService {
 	}
 
 
-	public void login(UserLoginModel userLoginModel) throws UserNotFoundException, IncorrectPasswordException {
-		Optional<UserEntity> userEntityByEmail = userRepository.findUserEntityByEmail(userLoginModel.getEmail());
-		if (userEntityByEmail.isPresent()) {
-			if (userEntityByEmail.get().getPassword().equals(userLoginModel.getPassword())) {
-				return;
-			} else {
-				throw new IncorrectPasswordException("Password incorrect");
-			}
-		}
-		throw new UserNotFoundException("User with email " + userLoginModel.getEmail() + " not found");
+	public String loginUser() throws UserNotFoundException, IncorrectPasswordException {
+			UserDetails userDetails= (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			return jwTtoken.generateToken(userDetails);
 	}
 
 	public void changePassword(UserChangePasswordModel user) throws
@@ -149,6 +153,4 @@ public class UserService {
 		}
 		throw new UserNotFoundException("User  not found");
 	}
-
-
 }
