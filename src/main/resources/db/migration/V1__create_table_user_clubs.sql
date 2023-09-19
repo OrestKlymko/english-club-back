@@ -13,6 +13,7 @@ CREATE TABLE users
 CREATE TABLE clubs
 (
     id                    BIGINT PRIMARY KEY AUTO_INCREMENT,
+    club_name             VARCHAR(50) NOT NULL,
     current_date_creation DATE,
     time_start            DATETIME,
     time_end              DATETIME,
@@ -32,14 +33,6 @@ CREATE TABLE exist_club_in_user
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
-CREATE TABLE creating_club_in_user
-(
-    id      BIGINT PRIMARY KEY AUTO_INCREMENT,
-    club_id BIGINT,
-    user_id BIGINT,
-    FOREIGN KEY (club_id) REFERENCES clubs (id),
-    FOREIGN KEY (user_id) REFERENCES users (id)
-);
 
 
 
@@ -53,14 +46,14 @@ VALUES ('user1@example.com', 'user1', '$2a$10$XptfskLsT1l/bRTLRiiCgejHqOpgXFreUn
        ('user5@example.com', 'user5', 'password5', 'Healthcare', 'Germany', 'Beginner', 'ROLE_ADMIN', 1);
 
 
-INSERT INTO clubs (current_date_creation, time_start, time_end, club_descriptions, themes, level_of_english,
+INSERT INTO clubs (current_date_creation,club_name, time_start, time_end, club_descriptions, themes, level_of_english,
                    own_user_id)
-VALUES ('2023-09-15', '2023-09-20 15:00:00', '2023-09-20 17:00:00', 'Club 1 description', 'IT', 'Intermediate', 1),
-       ('2023-09-16', '2023-09-21 14:00:00', '2023-09-21 16:00:00', 'Club 2 description', 'Marketing', 'Advanced', 2),
-       ('2023-09-17', '2023-09-22 13:00:00', '2023-09-22 15:00:00', 'Club 3 description', 'Education', 'Intermediate',
+VALUES ('2023-09-15','Marketing in IT', '2023-09-20 15:00:00', '2023-09-20 17:00:00', 'Club 1 description', 'IT', 'Intermediate', 1),
+       ('2023-09-16','Marketing in IT', '2023-09-21 14:00:00', '2023-09-21 16:00:00', 'Club 2 description', 'Marketing', 'Advanced', 2),
+       ('2023-09-17','Marketing in IT', '2023-09-22 13:00:00', '2023-09-22 15:00:00', 'Club 3 description', 'Education', 'Intermediate',
         3),
-       ('2023-09-18', '2023-09-23 12:00:00', '2023-09-23 14:00:00', 'Club 4 description', 'Finance', 'Mastery', 4),
-       ('2023-09-19', '2023-09-24 11:00:00', '2023-09-24 13:00:00', 'Club 5 description', 'Healthcare', 'Beginner', 5);
+       ('2023-09-18', 'Marketing in IT','2023-09-23 12:00:00', '2023-09-23 14:00:00', 'Club 4 description', 'Finance', 'Mastery', 4),
+       ('2023-09-19','Marketing in IT', '2023-09-24 11:00:00', '2023-09-24 13:00:00', 'Club 5 description', 'Healthcare', 'Beginner', 5);
 
 
 INSERT INTO exist_club_in_user (club_id, user_id)
@@ -71,10 +64,4 @@ VALUES (1, 1),
        (5, 5);
 
 
-INSERT INTO creating_club_in_user (club_id, user_id)
-VALUES (1, 1),
-       (2, 2),
-       (3, 3),
-       (4, 4),
-       (5, 5);
 

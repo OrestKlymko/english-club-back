@@ -24,15 +24,12 @@ public class ClubResponseModel {
 	private ThemesType themesType;
 	private LevelEnglish levelEnglish;
 
-	private Set<UserResponseInClubModel> userCreation;
+	private UserEntity userCreation;
 	private Set<UserResponseInClubModel> userExists;
 
 	public static ClubResponseModel toModel(ClubEntity clubEntity){
-		 Set<UserResponseInClubModel> userCreationSet = new HashSet<>();
 		 Set<UserResponseInClubModel> userExistSet = new HashSet<>();
-		for (UserEntity userEntity : clubEntity.getUserCreation()) {
-			userCreationSet.add(UserResponseInClubModel.toModel(userEntity));
-		}
+
 
 		for (UserEntity userEntity : clubEntity.getUserExists()) {
 			userExistSet.add(UserResponseInClubModel.toModel(userEntity));
@@ -46,7 +43,7 @@ public class ClubResponseModel {
 				.clubDescription(clubEntity.getClubDescription())
 				.themesType(clubEntity.getThemesType())
 				.levelEnglish(clubEntity.getLevelEnglish())
-				.userCreation(userCreationSet)
+				.userCreation(clubEntity.getUserCreation())
 				.userExists(userExistSet)
 				.build();
 

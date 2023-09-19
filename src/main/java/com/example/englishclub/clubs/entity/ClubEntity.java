@@ -25,6 +25,8 @@ public class ClubEntity {
 	private long id;
 	@Column(name = "current_date_creation")
 	private Date currentDate;
+	@Column(name = "club_name")
+	private String clubName;
 	@Column(name = "time_start")
 	@Temporal(TemporalType.TIME)
 	private Time timeStart;
@@ -39,9 +41,9 @@ public class ClubEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "level_of_english")
 	private LevelEnglish levelEnglish;
-	@ManyToMany(mappedBy = "creationClubs")
-	@JsonIgnoreProperties("creationClubs")
-	private Set<UserEntity> userCreation;
+	@ManyToOne
+	@JoinColumn(name="own_user_id", nullable=false)
+	private UserEntity userCreation;
 	@ManyToMany(mappedBy = "existClubs")
 	@JsonIgnoreProperties("existClubs")
 	private Set<UserEntity> userExists;

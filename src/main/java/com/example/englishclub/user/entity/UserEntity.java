@@ -38,13 +38,7 @@ public class UserEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "level_of_english")
 	private LevelEnglish levelOfEnglish;
-
-	@ManyToMany(cascade = CascadeType.ALL)
-	@JoinTable(
-			name = "creating_club_in_user",
-			joinColumns = @JoinColumn(name = "user_id"),
-			inverseJoinColumns = @JoinColumn(name = "club_id")
-	)
+	@OneToMany(fetch = FetchType.LAZY,cascade = CascadeType.ALL,mappedBy = "userCreation")
 	private Set<ClubEntity> creationClubs;
 	@ManyToMany(cascade = CascadeType.ALL)
 	@JoinTable(
