@@ -45,7 +45,7 @@ public class UserService {
 
 	public UserEntity getUser() throws UserNotFoundException, UserNotAuthenticated {
 
-		return getAuthenticatedUser();
+		return securityConfig.getAuthenticatedUser();
 	}
 
 	public List<UserResponseModel> getAll() {
@@ -121,20 +121,20 @@ public class UserService {
 	}
 
 	public void deleteUser() throws UserNotFoundException {
-		UserEntity correctAuth = getAuthenticatedUser();
+		UserEntity correctAuth = securityConfig.getAuthenticatedUser();
 		userRepository.deleteById(correctAuth.getId());
 
 	}
 
 	public void updateEnglishLevelById(String newLanguage) throws UserNotFoundException {
-		UserEntity authenticatedUser = getAuthenticatedUser();
+		UserEntity authenticatedUser = securityConfig.getAuthenticatedUser();
 		authenticatedUser.setLevelOfEnglish(LevelEnglish.valueOf(newLanguage));
 		userRepository.save(authenticatedUser);
 	}
 
 
 	public void joinToCourse(long club_id) throws UserNotFoundException, CourseNotFoundException {
-		UserEntity authenticatedUser = getAuthenticatedUser();
+		UserEntity authenticatedUser = securityConfig.getAuthenticatedUser();
 		Optional<ClubEntity> clubById = clubRepository.findById(club_id);
 		if (clubById.isPresent()) {
 			ClubEntity clubEntity = clubById.get();
@@ -147,15 +147,5 @@ public class UserService {
 		}
 	}
 
-	private UserEntity getAuthenticatedUser() throws UserNotFoundException {
 
-		Authentication auth = securityConfig.getAuth();
-		if (auth != null && auth.isAuthenticated()) {
-			Optional<UserEntity> userByUsername = userRepository.findUserEntityByUsername(auth.getName());
-			if (userByUsername.isPresent()) {
-				return userByUsername.get();
-			}
-		}
-		throw new UserNotFoundException("User  not found");
-	}
 }

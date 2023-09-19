@@ -1,6 +1,9 @@
 package com.example.englishclub.security;
 
 import com.example.englishclub.security.jwt.JwtRequestFilter;
+import com.example.englishclub.user.entity.UserEntity;
+import com.example.englishclub.user.exception.UserNotFoundException;
+import com.example.englishclub.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +25,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import javax.sql.DataSource;
 
+import java.util.Optional;
+
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @EnableWebSecurity
@@ -32,6 +37,9 @@ public class SecurityConfig {
 	@Autowired
 	private AuthenticationConfiguration authenticationConfiguration;
 
+	@Autowired
+	private UserRepository userRepository;
+
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
@@ -39,6 +47,8 @@ public class SecurityConfig {
 				.csrf(AbstractHttpConfigurer::disable)
 				.authorizeHttpRequests((authz) -> authz
 						.requestMatchers("/api/v1/user/create").permitAll()
+						.requestMatchers("/api/v1/user/login-user").permitAll()
+						.requestMatchers("/api/v1/user/all").permitAll()
 						.anyRequest().authenticated()
 				)
 				.sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -69,6 +79,18 @@ public class SecurityConfig {
 
 	public Authentication getAuth(){
 		return SecurityContextHolder.getContext().getAuthentication();
+	}
+
+	public UserEntity getAuthenticatedUser() throws UserNotFoundException {
+
+		Authentication auth = getAuth();
+		if (auth != null && auth.isAuthenticated()) {
+			Optional<UserEntity> userByUsername = userRepository.findUserEntityByUsername(auth.getName());
+			if (userByUsername.isPresent()) {
+				return userByUsername.get();
+			}
+		}
+		throw new UserNotFoundException("User  not found");
 	}
 
 }
