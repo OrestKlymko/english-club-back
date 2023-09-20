@@ -7,7 +7,7 @@ import com.example.englishclub.security.jwt.JwtRequest;
 import com.example.englishclub.security.jwt.JwtTokenResponse;
 import com.example.englishclub.user.entity.UserEntity;
 import com.example.englishclub.user.exception.*;
-import com.example.englishclub.user.exception.response.ErrorResponse;
+import com.example.englishclub.user.model.ResponseModel;
 import com.example.englishclub.user.model.UserChangePasswordModel;
 import com.example.englishclub.user.model.UserRegistrationModel;
 import com.example.englishclub.user.service.UserService;
@@ -17,8 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.net.URI;
 
 
@@ -30,7 +28,7 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 
-	@PostMapping("/create")
+	@PostMapping("/registration")
 	public ResponseEntity<Object> registerNewUser(@RequestBody UserRegistrationModel userRegistrationModel, HttpServletRequest request) {
 
 		try {
@@ -40,7 +38,7 @@ public class UserController {
 					.location(uri)
 					.allow(HttpMethod.POST)
 					.contentType(MediaType.APPLICATION_JSON)
-					.build();
+					.body(new ResponseModel(201, "User registration"));
 		} catch (UserAlreadyExistException | IncorrectEmailException | IncorrectPasswordException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.contentType(MediaType.APPLICATION_JSON)
@@ -59,7 +57,7 @@ public class UserController {
 		} catch (Exception e) {
 			return ResponseEntity.badRequest()
 					.contentType(MediaType.APPLICATION_JSON)
-					.body(new ErrorResponse(500, e.getMessage()));
+					.body(new ResponseModel(500, e.getMessage()));
 		}
 	}
 
@@ -70,7 +68,7 @@ public class UserController {
 			return ResponseEntity.status(HttpStatus.OK)
 					.contentType(MediaType.APPLICATION_JSON)
 					.allow(HttpMethod.POST)
-					.body("User deleted");
+					.body(new ResponseModel(201,"User deleted"));
 		} catch (UserNotFoundException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.contentType(MediaType.APPLICATION_JSON)
@@ -85,7 +83,7 @@ public class UserController {
 			return ResponseEntity.status(HttpStatus.ACCEPTED)
 					.contentType(MediaType.APPLICATION_JSON)
 					.allow(HttpMethod.POST)
-					.body(new ErrorResponse(202, "Password changed"));
+					.body(new ResponseModel(202, "Password changed"));
 		} catch (UserNotFoundException | IncorrectEmailException | IncorrectPasswordException | UserNotAuthenticated |
 		         UserPasswordDontMatchException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -101,11 +99,11 @@ public class UserController {
 			return ResponseEntity.status(HttpStatus.ACCEPTED)
 					.contentType(MediaType.APPLICATION_JSON)
 					.allow(HttpMethod.POST)
-					.body(new ErrorResponse(202, "Language changed"));
+					.body(new ResponseModel(202, "Language changed"));
 		} catch (UserNotFoundException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.contentType(MediaType.APPLICATION_JSON)
-					.body(new ErrorResponse(404, e.getMessage()));
+					.body(new ResponseModel(404, e.getMessage()));
 		}
 	}
 
@@ -115,7 +113,7 @@ public class UserController {
 			return ResponseEntity.ok(userService.getUser());
 		} catch (Exception e) {
 			return ResponseEntity.badRequest()
-					.body(new ErrorResponse(500, e.getMessage()));
+					.body(new ResponseModel(500, e.getMessage()));
 		}
 	}
 
@@ -126,7 +124,7 @@ public class UserController {
 			return ResponseEntity.status(HttpStatus.ACCEPTED)
 					.contentType(MediaType.APPLICATION_JSON)
 					.allow(HttpMethod.POST)
-					.body(new ErrorResponse(202, "Success joined"));
+					.body(new ResponseModel(202, "Success joined"));
 		} catch (UserNotFoundException | CourseNotFoundException e) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND)
 					.contentType(MediaType.APPLICATION_JSON)
