@@ -43,13 +43,13 @@ Example of success changed:
 
 | Request Parameter | Location     | Type     | Description                       |
 | :-------- | :------- | :------- | :-------------------------------- |
-| `username`      | `body` | String | **Required**. Username of customer |
+| `email`      | `body` | String | **Required**. Email of customer |
 | `password`      | `body` | String | **Required**. Password of customer |
 
 Example of body request:
 ```http
 {
-    "username":"user1",
+    "email":"user1@gmail.com",
     "password":"password1"
 }
 ```
