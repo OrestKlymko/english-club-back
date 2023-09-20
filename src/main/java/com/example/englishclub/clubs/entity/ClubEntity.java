@@ -9,11 +9,13 @@ import lombok.*;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.util.Objects;
 import java.util.Set;
 
 
 @Entity
 @Data
+@EqualsAndHashCode
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -47,5 +49,18 @@ public class ClubEntity {
 	@ManyToMany(mappedBy = "existClubs")
 	@JsonIgnoreProperties("existClubs")
 	private Set<UserEntity> userExists;
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		ClubEntity that = (ClubEntity) o;
+		return id == that.id && Objects.equals(clubName, that.clubName) && Objects.equals(userCreation, that.userCreation);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, clubName, userCreation);
+	}
 }
 

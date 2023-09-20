@@ -22,12 +22,12 @@ public class ClubController {
 	private ClubService clubService;
 
 	@GetMapping("/get-all")
-	public ResponseEntity<?> getAllCourse() {
+	public ResponseEntity<Object>  getAllCourse() {
 		return ResponseEntity.ok().body(clubService.getAllClubs());
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<?> getOneCourse(@PathVariable long id) {
+	public ResponseEntity<Object>  getOneCourse(@PathVariable long id) {
 		try {
 			return ResponseEntity.status(HttpStatus.ACCEPTED)
 					.contentType(MediaType.APPLICATION_JSON)
@@ -41,7 +41,7 @@ public class ClubController {
 	}
 
 	@PostMapping("/create-club")
-	public ResponseEntity<?> createClubByUser(@RequestBody ClubCreatingRequestModel creatingRequestModel) {
+	public ResponseEntity<Object>  createClubByUser(@RequestBody ClubCreatingRequestModel creatingRequestModel) {
 
 		try {
 			clubService.createClubByUser(creatingRequestModel);
@@ -58,7 +58,7 @@ public class ClubController {
 	}
 
 	@PostMapping("/delete-club/{id}")
-	public ResponseEntity<?> deleteClubByUser(@PathVariable long id) {
+	public ResponseEntity<Object> deleteClubByUser(@PathVariable long id) {
 		try {
 			clubService.deleteClubByUser(id);
 			return ResponseEntity.status(HttpStatus.ACCEPTED)
@@ -74,7 +74,7 @@ public class ClubController {
 	}
 
 	@PostMapping("/update-club/{id}")
-	public ResponseEntity<?> updateClubByUser(@PathVariable long id, @RequestBody ClubCreatingRequestModel model) {
+	public ResponseEntity<Object>  updateClubByUser(@PathVariable long id, @RequestBody ClubCreatingRequestModel model) {
 		try {
 			clubService.updateClubByUser(id,model);
 			return ResponseEntity.status(HttpStatus.ACCEPTED)
