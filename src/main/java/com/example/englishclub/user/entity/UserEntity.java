@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Objects;
 import java.util.Set;
 
 @Table(name = "users")
@@ -53,4 +54,16 @@ public class UserEntity {
 	@JsonIgnore
 	private boolean enabled;
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		UserEntity that = (UserEntity) o;
+		return id == that.id && Objects.equals(email, that.email) && Objects.equals(username, that.username);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, email, username);
+	}
 }

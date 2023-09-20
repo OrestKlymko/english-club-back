@@ -10,10 +10,7 @@ import com.example.englishclub.security.jwt.JwtRequest;
 import com.example.englishclub.user.entity.UserEntity;
 import com.example.englishclub.user.entity.enums.LevelEnglish;
 import com.example.englishclub.user.entity.enums.ThemesType;
-import com.example.englishclub.user.exception.IncorrectEmailException;
-import com.example.englishclub.user.exception.IncorrectPasswordException;
-import com.example.englishclub.user.exception.UserAlreadyExistException;
-import com.example.englishclub.user.exception.UserNotFoundException;
+import com.example.englishclub.user.exception.*;
 import com.example.englishclub.user.model.UserChangePasswordModel;
 import com.example.englishclub.user.model.UserRegistrationModel;
 import com.example.englishclub.user.model.UserResponseModel;
@@ -43,8 +40,8 @@ public class UserService {
 	private JWTtoken jwTtoken;
 
 
-	public UserEntity getUser() throws UserNotFoundException, UserNotAuthenticated {
-
+	public UserEntity getUser() throws UserNotFoundException {
+		System.out.println(securityConfig.getAuth().isAuthenticated());
 		return securityConfig.getAuthenticatedUser();
 	}
 
@@ -99,7 +96,6 @@ public class UserService {
 		Authentication authentication = securityConfig.authenticationManager().authenticate(
 				new UsernamePasswordAuthenticationToken(jwtRequest.getUsername(), jwtRequest.getPassword())
 		);
-
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		return jwTtoken.generateToken(userDetails);
@@ -107,14 +103,22 @@ public class UserService {
 
 
 	public void changePassword(UserChangePasswordModel user) throws
-			UserNotFoundException, IncorrectEmailException, IncorrectPasswordException {
+			UserNotFoundException, IncorrectEmailException, IncorrectPasswordException, UserNotAuthenticated, UserPasswordDontMatchException {
+		UserEntity authenticatedUser = securityConfig.getAuthenticatedUser();
+		if (!Objects.equals(authenticatedUser.getEmail(), user.getEmail())) {
+			throw new UserNotAuthenticated("User not authenticated");
+		}
 		Optional<UserEntity> userEntityByEmail = userRepository.findUserEntityByEmail(user.getEmail());
+
 		if (userEntityByEmail.isEmpty()) {
 			throw new UserNotFoundException("User with email " + user.getEmail() + " not found");
 		} else {
-			UserEntity userEntity = userEntityByEmail.get();
 			if (createNewCustomerSuccess(user.getEmail(), user.getNewPassword())) {
-				userEntity.setPassword(user.getNewPassword());
+				UserEntity userEntity = userEntityByEmail.get();
+				if (!securityConfig.passwordEncoder().matches(user.getOldPassword(), userEntity.getPassword())) {
+					throw new UserPasswordDontMatchException("Old password didn't match");
+				}
+				userEntity.setPassword(securityConfig.passwordEncoder().encode(user.getNewPassword()));
 				userRepository.save(userEntity);
 			}
 		}
@@ -135,13 +139,14 @@ public class UserService {
 
 	public void joinToCourse(long club_id) throws UserNotFoundException, CourseNotFoundException {
 		UserEntity authenticatedUser = securityConfig.getAuthenticatedUser();
+		UserEntity userEntity = userRepository.findById(authenticatedUser.getId()).orElseThrow(() -> new UserNotFoundException("User not found"));
 		Optional<ClubEntity> clubById = clubRepository.findById(club_id);
 		if (clubById.isPresent()) {
 			ClubEntity clubEntity = clubById.get();
 			Set<ClubEntity> existClubs = authenticatedUser.getExistClubs();
 			existClubs.add(clubEntity);
 			authenticatedUser.setExistClubs(existClubs);
-			userRepository.save(authenticatedUser);
+			userRepository.save(userEntity);
 		} else {
 			throw new CourseNotFoundException("Course with id " + club_id + " not found");
 		}

@@ -21,6 +21,9 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 
 import javax.sql.DataSource;
@@ -40,8 +43,21 @@ public class SecurityConfig {
 	@Autowired
 	private UserRepository userRepository;
 
+//	@Bean
+//	public CorsFilter corsFilter() {
+//		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//		CorsConfiguration config = new CorsConfiguration();
+//		config.setAllowCredentials(true);
+//		config.addAllowedOrigin("http://localhost:8089");
+//		config.addAllowedHeader("*");
+//		config.addAllowedMethod("*");
+//		source.registerCorsConfiguration("/**", config);
+//		return new CorsFilter(source);
+//	}
+
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
 		http
 				.cors(AbstractHttpConfigurer::disable)
 				.csrf(AbstractHttpConfigurer::disable)
@@ -52,7 +68,7 @@ public class SecurityConfig {
 						.anyRequest().authenticated()
 				)
 				.sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.httpBasic(withDefaults())
+				.httpBasic(AbstractHttpConfigurer::disable)
 				.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}
